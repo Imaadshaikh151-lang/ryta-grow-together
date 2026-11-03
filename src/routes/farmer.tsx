@@ -20,7 +20,7 @@ function Farmer() {
   const { jobs, applications } = useStore();
   const [tab, setTab] = useState<"post" | "jobs">("jobs");
   const [posted, setPosted] = useState(false);
-  const [f, setF] = useState({ title: "", workType: WORK_TYPES[0], location: "", date: "", wage: "500", workersNeeded: "4" });
+  const [f, setF] = useState({ title: "", workType: WORK_TYPES[0] as string, location: "", date: "", wage: "500", workersNeeded: "4" });
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
