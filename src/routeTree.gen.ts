@@ -10,33 +10,63 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as FarmerRouteImport } from './routes/farmer'
+import { Route as LabourerRouteImport } from './routes/labourer'
+import { Route as OwnerRouteImport } from './routes/owner'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FarmerRoute = FarmerRouteImport.update({
+  id: '/farmer',
+  path: '/farmer',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LabourerRoute = LabourerRouteImport.update({
+  id: '/labourer',
+  path: '/labourer',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OwnerRoute = OwnerRouteImport.update({
+  id: '/owner',
+  path: '/owner',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/farmer': typeof FarmerRoute
+  '/labourer': typeof LabourerRoute
+  '/owner': typeof OwnerRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/farmer': typeof FarmerRoute
+  '/labourer': typeof LabourerRoute
+  '/owner': typeof OwnerRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/farmer': typeof FarmerRoute
+  '/labourer': typeof LabourerRoute
+  '/owner': typeof OwnerRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/farmer' | '/labourer' | '/owner'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/farmer' | '/labourer' | '/owner'
+  id: '__root__' | '/' | '/farmer' | '/labourer' | '/owner'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  FarmerRoute: typeof FarmerRoute
+  LabourerRoute: typeof LabourerRoute
+  OwnerRoute: typeof OwnerRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +78,35 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/farmer': {
+      id: '/farmer'
+      path: '/farmer'
+      fullPath: '/farmer'
+      preLoaderRoute: typeof FarmerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/labourer': {
+      id: '/labourer'
+      path: '/labourer'
+      fullPath: '/labourer'
+      preLoaderRoute: typeof LabourerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/owner': {
+      id: '/owner'
+      path: '/owner'
+      fullPath: '/owner'
+      preLoaderRoute: typeof OwnerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  FarmerRoute: FarmerRoute,
+  LabourerRoute: LabourerRoute,
+  OwnerRoute: OwnerRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
