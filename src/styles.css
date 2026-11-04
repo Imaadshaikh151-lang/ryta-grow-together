@@ -45,10 +45,15 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
-  --color-lime: var(--lime);
-  --color-lime-foreground: var(--lime-foreground);
+  --color-harvest: var(--harvest);
+  --color-harvest-foreground: var(--harvest-foreground);
+  --color-primary-deep: var(--primary-deep);
+  --color-status-applied: var(--status-applied);
+  --color-status-applied-foreground: var(--status-applied-foreground);
+  --color-status-confirmed: var(--status-confirmed);
+  --color-status-confirmed-foreground: var(--status-confirmed-foreground);
   --font-display: var(--font-display);
-  --font-sans: "Figtree", system-ui, sans-serif;
+  --font-sans: "Figtree", "Noto Sans Kannada", system-ui, sans-serif;
   --color-ring-offset-background: var(--background);
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
@@ -66,30 +71,35 @@
 }
 
 :root {
+  /* RYTA earthy palette: soil brown, field beige, leaf green */
   --radius: 0.875rem;
-  --font-display: "Outfit", system-ui, sans-serif;
-  --background: oklch(0.985 0.008 140);
-  --foreground: oklch(0.22 0.04 150);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.22 0.04 150);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.22 0.04 150);
-  --primary: oklch(0.42 0.11 150);
-  --primary-foreground: oklch(0.99 0 0);
-  --primary-deep: oklch(0.32 0.09 155);
-  --lime: oklch(0.88 0.2 128);
-  --lime-foreground: oklch(0.25 0.06 145);
-  --secondary: oklch(0.95 0.05 128);
-  --secondary-foreground: oklch(0.25 0.06 145);
-  --muted: oklch(0.955 0.012 140);
-  --muted-foreground: oklch(0.48 0.03 150);
-  --accent: oklch(0.95 0.05 128);
-  --accent-foreground: oklch(0.25 0.06 145);
-  --destructive: oklch(0.577 0.245 27.325);
+  --font-display: "Outfit", "Baloo Tamma 2", system-ui, sans-serif;
+  --background: oklch(0.965 0.018 85);
+  --foreground: oklch(0.27 0.04 55);
+  --card: oklch(0.99 0.008 85);
+  --card-foreground: oklch(0.27 0.04 55);
+  --popover: oklch(0.99 0.008 85);
+  --popover-foreground: oklch(0.27 0.04 55);
+  --primary: oklch(0.43 0.09 145);
+  --primary-foreground: oklch(0.985 0.01 85);
+  --primary-deep: oklch(0.34 0.05 55);
+  --harvest: oklch(0.8 0.1 78);
+  --harvest-foreground: oklch(0.27 0.05 55);
+  --secondary: oklch(0.92 0.035 80);
+  --secondary-foreground: oklch(0.27 0.04 55);
+  --muted: oklch(0.935 0.022 82);
+  --muted-foreground: oklch(0.47 0.04 60);
+  --accent: oklch(0.92 0.035 80);
+  --accent-foreground: oklch(0.27 0.04 55);
+  --destructive: oklch(0.55 0.19 30);
   --destructive-foreground: oklch(0.99 0 0);
-  --border: oklch(0.91 0.02 140);
-  --input: oklch(0.91 0.02 140);
-  --ring: oklch(0.42 0.11 150);
+  --border: oklch(0.87 0.03 78);
+  --input: oklch(0.82 0.035 75);
+  --ring: oklch(0.43 0.09 145);
+  --status-applied: oklch(0.92 0.06 85);
+  --status-applied-foreground: oklch(0.36 0.07 60);
+  --status-confirmed: oklch(0.88 0.08 145);
+  --status-confirmed-foreground: oklch(0.3 0.08 145);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -153,7 +163,7 @@
 
 body { font-size: 17px; }
 @utility hero-gradient {
-  background: radial-gradient(circle at 85% 10%, color-mix(in oklab, var(--lime) 45%, transparent), transparent 55%), linear-gradient(160deg, var(--primary), var(--primary-deep));
+  background: radial-gradient(circle at 85% 10%, color-mix(in oklab, var(--harvest) 40%, transparent), transparent 55%), linear-gradient(160deg, var(--primary), var(--primary-deep));
 }
 @utility shadow-soft {
   box-shadow: 0 6px 20px -12px color-mix(in oklab, var(--primary) 35%, transparent);
