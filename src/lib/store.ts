@@ -1,4 +1,5 @@
 import { useSyncExternalStore } from "react";
+import { allocate, validRequirements, type Workforce, type WorkerDetails, type Skill } from "@/lib/workforce";
 
 export type Job = {
   id: string;
@@ -10,7 +11,7 @@ export type Job = {
   workersNeeded: number;
   farm: string;
   sample?: boolean;
-};
+} & Partial<Workforce>;
 export type Application = {
   id: string;
   jobId: string;
@@ -21,12 +22,16 @@ export type Application = {
   agent?: string; // set when applied through a labour agent's team
   memberId?: string;
   sample?: boolean;
+  offerId?: string;
+  gender?: "male" | "female";
+  selectedSkills?: Skill[];
 };
 export type Availability = "everyday" | "weekdays" | "weekends" | "thisMonth";
 export type Profile = { name: string; skills: string; location: string; availability: Availability };
-export type TeamMember = { id: string; name: string; skills: string };
+export type TeamMember = { id: string; name: string; skills: string } & WorkerDetails;
 export type Agent = { name: string; location: string };
-type State = { jobs: Job[]; applications: Application[]; profile: Profile | null; agent: Agent | null; team: TeamMember[] };
+export type Offer = { id: string; jobId: string; agent: string; distance: number; transport: number; wage: number; memberIds: string[]; signature: string; status: "proposed" | "confirmed"; workers: TeamMember[] };
+export type State = { jobs: Job[]; applications: Application[]; profile: Profile | null; agent: Agent | null; team: TeamMember[]; offers: Offer[]; maxRadius: number };
 
 export const WORK_TYPES = ["Harvesting", "Sowing", "Weeding", "Ploughing", "Spraying", "Coffee picking", "Irrigation"] as const;
 export const AVAILABILITY: Availability[] = ["everyday", "weekdays", "weekends", "thisMonth"];
@@ -46,6 +51,8 @@ export const seed = (): State => ({
   profile: null,
   agent: null,
   team: [],
+  offers: [],
+  maxRadius: 60,
 });
 
 const KEY = "ryta-demo-v2";
@@ -85,7 +92,14 @@ const uid = () => Math.random().toString(36).slice(2, 9);
 const confirmedCount = (jobId: string) => state.applications.filter((a) => a.jobId === jobId && a.status === "confirmed").length;
 
 export const actions = {
-  postJob: (j: Omit<Job, "id">) => set({ jobs: [{ ...j, id: uid() }, ...state.jobs] }),
+  postJob: (j: Omit<Job, "id">) => {
+    if (!validRequirements(j)) return false;
+    set({ jobs: [{ ...j, id: uid() }, ...state.jobs] }); return true;
+  },
+  editJob: (id: string, j: Omit<Job, "id">) => {
+    if (!validRequirements(j) || state.applications.some(a => a.jobId === id && a.status === "confirmed")) return false;
+    set({ jobs: state.jobs.map(old => old.id === id ? { ...j, id } : old) }); return true;
+  },
   saveProfile: (p: Profile) => set({ profile: p }),
   apply: (jobId: string) => {
     const p = state.profile;
@@ -94,24 +108,33 @@ export const actions = {
   },
   saveAgent: (a: Agent) => set({ agent: a }),
   addMember: (m: Omit<TeamMember, "id">) => set({ team: [...state.team, { ...m, id: uid() }] }),
+  editMember: (id: string, m: Omit<TeamMember, "id">) => set({ team: state.team.map(old => old.id === id ? { ...m, id } : old) }),
   removeMember: (id: string) => set({ team: state.team.filter((m) => m.id !== id) }),
-  /** Applies every team member not yet applied to this job. Returns how many were added. */
-  applyTeam: (jobId: string) => {
-    const ag = state.agent;
-    if (!ag) return 0;
-    const fresh = state.team.filter((m) => !state.applications.some((a) => a.jobId === jobId && a.memberId === m.id));
-    set({
-      applications: [
-        ...state.applications,
-        ...fresh.map((m) => ({ id: uid(), jobId, workerName: m.name, skills: m.skills, location: ag.location, status: "applied" as const, agent: ag.name, memberId: m.id })),
-      ],
-    });
-    return fresh.length;
+  setRadius: (n: number) => { if (Number.isFinite(n) && n >= 20) set({ maxRadius: n }); },
+  submitOffer: (jobId: string, quote: { distance: number; transport: number; wage: number }) => {
+    const job = state.jobs.find(j => j.id === jobId);
+    const agent = state.agent;
+    if (!job || !agent || !validRequirements(job) || !Number.isFinite(quote.distance) || quote.distance < 0 || !Number.isFinite(quote.transport) || quote.transport < 0 || !Number.isFinite(quote.wage) || quote.wage <= 0) return false;
+    const old = state.offers.find(o => o.jobId === jobId && o.agent === agent.name);
+    if (old?.status === "confirmed") return false;
+    const result = allocate(job, state.team, state.jobs, state.applications);
+    const offer: Offer = { ...quote, id: old?.id ?? uid(), jobId, agent: agent.name, memberIds: result.selected.map(w => w.id), signature: result.signature, status: "proposed", workers: result.selected.map(w => ({ ...w, selectedSkills: [...(w.selectedSkills ?? [])] })) };
+    set({ offers: [...state.offers.filter(o => o.id !== offer.id), offer] }); return true;
+  },
+  confirmOffer: (id: string) => {
+    const offer = state.offers.find(o => o.id === id);
+    const job = offer && state.jobs.find(j => j.id === offer.jobId);
+    if (!offer || !job || offer.status === "confirmed" || offer.distance > state.maxRadius) return false;
+    const result = allocate(job, state.team, state.jobs, state.applications);
+    if (!result.suitable || result.signature !== offer.signature || result.selected.map(w => w.id).join() !== offer.memberIds.join()) return false;
+    const records: Application[] = result.selected.map(w => ({ id: uid(), jobId: job.id, workerName: w.name, skills: w.skills, selectedSkills: w.selectedSkills, gender: w.gender, location: state.agent?.location ?? "", status: "confirmed", agent: offer.agent, memberId: w.id, offerId: offer.id }));
+    set({ offers: state.offers.map(o => o.id === id ? { ...o, status: "confirmed" } : o), applications: [...state.applications.filter(a => !(a.jobId === job.id && a.agent === offer.agent && a.status === "applied")), ...records] }); return true;
   },
   confirm: (id: string) => {
     const app = state.applications.find((a) => a.id === id);
     const job = app && state.jobs.find((j) => j.id === app.jobId);
     if (!app || !job || app.status === "confirmed" || confirmedCount(job.id) >= job.workersNeeded) return;
+    if (app.agent || (validRequirements(job) && (!app.gender || !job.requiredSkills?.every(s => app.selectedSkills?.includes(s)) || state.applications.filter(a => a.jobId === job.id && a.status === "confirmed" && a.gender === app.gender).length >= (app.gender === "male" ? (job.male ?? 0) : (job.female ?? 0))))) return;
     set({ applications: state.applications.map((a) => (a.id === id ? { ...a, status: "confirmed" } : a)) });
   },
   reset: () => set(seed()),
