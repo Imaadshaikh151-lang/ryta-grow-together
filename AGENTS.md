@@ -8,3 +8,6 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+- All user-facing text lives in `src/lib/i18n.ts` (English source + Kannada, typed so every key must exist) and is read with `useT()`; never hard-code copy in components — keeps both languages complete.
+- Demo data lives only in browser storage via `src/lib/store.ts`; sample records carry `sample: true` and are labelled — the app has no backend yet.
