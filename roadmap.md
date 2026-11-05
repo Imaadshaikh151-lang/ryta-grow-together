@@ -1,0 +1,4 @@
+- [ ] Add bilingual quick-add/edit roster with gender, skills and availability.
+- [ ] Add validated job workforce requirements and working hours.
+- [ ] Add separate offers, deterministic allocation, distance discovery and atomic team confirmation.
+- [ ] Test rules and existing mobile/language flows; report limitations.
