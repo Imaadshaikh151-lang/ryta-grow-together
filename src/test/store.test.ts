@@ -15,14 +15,14 @@ describe("demo store", () => {
 
   it("a farm owner cannot confirm more workers than needed", () => {
     actions.postJob({ title: "T", workType: "Weeding", location: "Sirsi", date: "2026-12-01", wage: 500, workersNeeded: 1, farm: "F" });
-    const jobId = getState().jobs[0].id;
+    const jobId = getState().jobs[0]!.id;
     actions.saveAgent({ name: "Agent A", location: "Sirsi" });
     actions.addMember({ name: "W1", skills: "x" });
     actions.addMember({ name: "W2", skills: "x" });
     expect(actions.applyTeam(jobId)).toBe(2);
     const apps = getState().applications.filter((a) => a.jobId === jobId);
-    actions.confirm(apps[0].id);
-    actions.confirm(apps[1].id);
+    actions.confirm(apps[0]!.id);
+    actions.confirm(apps[1]!.id);
     expect(getState().applications.filter((a) => a.jobId === jobId && a.status === "confirmed")).toHaveLength(1);
   });
 
