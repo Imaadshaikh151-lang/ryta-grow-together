@@ -11,3 +11,5 @@
 
 - All user-facing text lives in `src/lib/i18n.ts` (English source + Kannada, typed so every key must exist) and is read with `useT()`; never hard-code copy in components — keeps both languages complete.
 - Demo data lives only in browser storage via `src/lib/store.ts`; sample records carry `sample: true` and are labelled — the app has no backend yet.
+- Workforce matching is a pure shared module; offers are separate from jobs and confirmed applications retain worker snapshots, enabling deterministic allocation and atomic demo team confirmation.
+- Provider distance is explicitly entered as a demo estimate, never inferred from village names; discovery operates only on submitted local offers.

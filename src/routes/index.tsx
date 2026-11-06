@@ -12,6 +12,8 @@ export const Route = createFileRoute("/")({
       { name: "description", content: "RYTA connects farm owners, labour agents and independent labourers in Karnataka. Available in English and Kannada." },
       { property: "og:title", content: "RYTA — The Farmers App" },
       { property: "og:description", content: "Farm labour marketplace for Karnataka, in English and Kannada." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: Index,

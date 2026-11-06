@@ -12,6 +12,8 @@ export const Route = createFileRoute("/labourer")({
       { name: "description", content: "Independent labourers create a simple profile, browse farm jobs in Karnataka and apply on RYTA." },
       { property: "og:title", content: "Find farm work | RYTA" },
       { property: "og:description", content: "Browse farm jobs and apply yourself." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: Labourer,

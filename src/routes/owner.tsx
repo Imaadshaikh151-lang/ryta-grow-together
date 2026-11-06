@@ -3,6 +3,8 @@ import { useState } from "react";
 import { Check } from "lucide-react";
 import { Btn, Card, DemoNote, Field, Shell, Status, inputCls } from "@/components/Shell";
 import { JobInfo } from "@/components/JobInfo";
+import { Skills, Requirements, OfferDetails } from "@/components/Workforce";
+import { allocate, discover, validRequirements, type Skill } from "@/lib/workforce";
 import { actions, rupees, useStore, WORK_TYPES } from "@/lib/store";
 import { useT, type TKey } from "@/lib/i18n";
 
@@ -13,6 +15,8 @@ export const Route = createFileRoute("/owner")({
       { name: "description", content: "Farm owners post farm jobs, confirm applicants and see daily worker costs on RYTA." },
       { property: "og:title", content: "Farm owner | RYTA" },
       { property: "og:description", content: "Post farm jobs, confirm workers and see costs." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: Owner,
@@ -23,21 +27,29 @@ const TAB_LABEL: Record<Tab, TKey> = { jobs: "owner.tabJobs", post: "owner.tabPo
 
 function Owner() {
   const { t, date } = useT();
-  const { jobs, applications } = useStore();
+  const state = useStore();
+  const { jobs, applications, offers, maxRadius } = state;
   const [tab, setTab] = useState<Tab>("jobs");
   const [posted, setPosted] = useState(false);
-  const [f, setF] = useState({ title: "", workType: WORK_TYPES[0] as string, location: "", date: "", wage: "500", workersNeeded: "4" });
+  const [editing, setEditing] = useState<string | null>(null);
+  const [error, setError] = useState(false);
+  const [offerError, setOfferError] = useState(false);
+  const [f, setF] = useState({ title: "", workType: WORK_TYPES[0] as string, location: "", date: "", wage: "500", workersNeeded: "4", male: "2", female: "2", requiredSkills: [] as Skill[], start: "08:00", end: "17:00" });
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    actions.postJob({ ...f, title: f.title || t(`work.${f.workType}` as TKey), wage: +f.wage, workersNeeded: +f.workersNeeded, farm: t("owner.myFarm") });
+    const old = jobs.find(j => j.id === editing);
+    const job = { ...f, male: +f.male, female: +f.female, title: f.title || t(`work.${f.workType}` as TKey), wage: +f.wage, workersNeeded: +f.workersNeeded, farm: old?.farm ?? t("owner.myFarm"), ...(old?.sample ? { sample: true } : {}) };
+    if (!validRequirements(job)) { setError(true); return; }
+    if (!(editing ? actions.editJob(editing, job) : actions.postJob(job))) { setError(true); return; }
+    setEditing(null); setError(false);
     setF({ ...f, title: "", location: "", date: "" });
     setPosted(true);
     setTab("jobs");
   };
 
   const confirmed = applications.filter((a) => a.status === "confirmed");
-  const cost = (jobId: string) => (jobs.find((x) => x.id === jobId)?.wage ?? 0) * confirmed.filter((a) => a.jobId === jobId).length;
+  const cost = (jobId: string) => confirmed.filter(a => a.jobId === jobId).reduce((s,a) => s + (offers.find(o => o.id === a.offerId)?.wage ?? jobs.find(j => j.id === jobId)?.wage ?? 0), 0) + offers.filter(o => o.jobId === jobId && o.status === "confirmed").reduce((s,o) => s + o.transport, 0);
   const total = jobs.reduce((s, j) => s + cost(j.id), 0);
   const farms = [...new Set(jobs.map((j) => j.farm))];
 
@@ -45,10 +57,9 @@ function Owner() {
     <Shell title={t("role.owner")}>
       <div className="mb-6 grid grid-cols-3 gap-1.5 rounded-2xl bg-muted p-1.5">
         {(["jobs", "post", "summary"] as const).map((x) => (
-          <button key={x} onClick={() => { setTab(x); setPosted(false); }}
-            className={`min-h-12 rounded-xl px-1 text-base font-semibold leading-tight ${tab === x ? "bg-primary text-primary-foreground" : "text-foreground"}`}>
+          <Btn key={x} variant={tab === x ? "primary" : "outline"} onClick={() => { setTab(x); setPosted(false); }}>
             {t(TAB_LABEL[x])}
-          </button>
+          </Btn>
         ))}
       </div>
 
@@ -76,21 +87,36 @@ function Owner() {
               <input required type="number" min={1} className={inputCls} value={f.workersNeeded} onChange={(e) => setF({ ...f, workersNeeded: e.target.value })} />
             </Field>
           </div>
+          <div className="grid grid-cols-2 gap-3">
+            <Field label={t("wf.males")}><input required type="number" min={0} step={1} className={inputCls} value={f.male} onChange={e => setF({...f,male:e.target.value})}/></Field>
+            <Field label={t("wf.females")}><input required type="number" min={0} step={1} className={inputCls} value={f.female} onChange={e => setF({...f,female:e.target.value})}/></Field>
+            <Field label={t("wf.start")}><input required type="time" className={inputCls} value={f.start} onChange={e => setF({...f,start:e.target.value})}/></Field>
+            <Field label={t("wf.end")}><input required type="time" className={inputCls} value={f.end} onChange={e => setF({...f,end:e.target.value})}/></Field>
+          </div>
+          <Skills value={f.requiredSkills} onChange={requiredSkills => setF({...f,requiredSkills})}/>
+          {error && <p role="alert" className="font-semibold">{t("wf.invalid")}</p>}
           <Btn type="submit">{t("owner.postJob")}</Btn>
         </form>
       )}
 
       {tab === "jobs" && (
         <div className="space-y-4">
+          <Field label={t("wf.radius")}><input type="number" min={20} step={1} className={inputCls} value={maxRadius} onChange={e => actions.setRadius(+e.target.value)}/></Field>
+          {offerError && <p role="alert">{t("wf.changed")}</p>}
           {posted && <div role="status" className="rounded-xl bg-status-confirmed p-4 text-lg font-semibold text-status-confirmed-foreground">{t("owner.posted")}</div>}
           {jobs.length === 0 && <p className="text-lg text-muted-foreground">{t("owner.noJobs")}</p>}
           {jobs.map((j) => {
-            const apps = applications.filter((a) => a.jobId === j.id);
+            const apps = applications.filter((a) => a.jobId === j.id && !a.agent);
             const c = apps.filter((a) => a.status === "confirmed").length;
             const full = c >= j.workersNeeded;
+            const discovery = discover(offers.filter(o => o.jobId === j.id), o => o.status === "confirmed" || allocate(j, state.team, jobs, applications).suitable, maxRadius);
+            const allConfirmed = applications.filter(a => a.jobId === j.id && a.status === "confirmed").length;
             return (
-              <Card key={j.id}>
-                <JobInfo job={j} extra={t("job.confirmedOf", { c, n: j.workersNeeded })} />
+              <section className="space-y-4" key={j.id}>
+              <Card>
+                <JobInfo job={j} extra={t("job.confirmedOf", { c: allConfirmed, n: j.workersNeeded })} />
+                <Requirements job={j}/>
+                {allConfirmed === 0 && <div className="mt-3"><Btn variant="outline" onClick={() => { setEditing(j.id); setError(false); setF({ title:j.title, workType:j.workType, location:j.location, date:j.date, wage:String(j.wage), workersNeeded:String(j.workersNeeded), male:String(j.male ?? 0), female:String(j.female ?? 0), requiredSkills:j.requiredSkills ?? [], start:j.start ?? "08:00", end:j.end ?? "17:00" }); setTab("post"); }}>{t("wf.editJob")}</Btn></div>}
                 <div className="mt-2 border-t pt-3">
                   <p className="mb-2 font-semibold">{t("owner.applicants", { n: apps.length })}</p>
                   {apps.length === 0 && <p className="text-muted-foreground">{t("owner.noApplicants")}</p>}
@@ -109,14 +135,17 @@ function Owner() {
                         ) : full ? (
                           <span className="shrink-0 text-sm text-muted-foreground">{t("owner.full")}</span>
                         ) : (
-                          <button onClick={() => actions.confirm(a.id)}
-                            className="min-h-12 shrink-0 rounded-xl bg-primary px-4 font-semibold text-primary-foreground">{t("owner.confirm")}</button>
+                          <Btn disabled={validRequirements(j) && (!a.gender || !j.requiredSkills?.every(s => a.selectedSkills?.includes(s)))} onClick={() => actions.confirm(a.id)}>{t("owner.confirm")}</Btn>
                         )}
                       </li>
                     ))}
                   </ul>
                 </div>
               </Card>
+              <p className="text-sm text-muted-foreground">{t("wf.search",{n:discovery.radius})}</p>
+              {discovery.outside > 0 && <p className="text-sm text-muted-foreground">{t("wf.outside",{n:discovery.outside})}</p>}
+              {discovery.offers.map(o => <Card key={o.id}><OfferDetails offer={o} state={state} onConfirm={() => setOfferError(!actions.confirmOffer(o.id))}/></Card>)}
+              </section>
             );
           })}
         </div>
@@ -133,7 +162,7 @@ function Owner() {
             ))}
           </div>
           <div className="hero-gradient mb-6 rounded-2xl p-5 text-primary-foreground">
-            <div className="text-base opacity-90">{t("owner.totalCost")}</div>
+            <div className="text-base opacity-90">{t("wf.confirmedCost")}</div>
             <div className="font-display text-4xl font-bold">{rupees(total)}</div>
           </div>
           {farms.map((farm) => (

@@ -23,8 +23,8 @@ export type Application = {
   memberId?: string;
   sample?: boolean;
   offerId?: string;
-  gender?: "male" | "female";
-  selectedSkills?: Skill[];
+  gender?: "male" | "female" | undefined;
+  selectedSkills?: Skill[] | undefined;
 };
 export type Availability = "everyday" | "weekdays" | "weekends" | "thisMonth";
 export type Profile = { name: string; skills: string; location: string; availability: Availability };

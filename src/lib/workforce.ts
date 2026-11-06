@@ -2,7 +2,7 @@ export const SKILLS = ['Harvesting', 'Weeding', 'Picking', 'Spraying', 'Planting
 export type Skill = typeof SKILLS[number];
 export type Gender = 'male' | 'female';
 export type Workforce = { male: number; female: number; requiredSkills: Skill[]; start: string; end: string };
-export type WorkerDetails = { gender?: Gender; selectedSkills?: Skill[]; from?: string; until?: string; start?: string; end?: string };
+export type WorkerDetails = { gender?: Gender | undefined; selectedSkills?: Skill[] | undefined; from?: string; until?: string; start?: string; end?: string };
 export function validRequirements(j: { workersNeeded: number } & Partial<Workforce>) {
  return Number.isInteger(j.workersNeeded) && j.workersNeeded > 0 && Number.isInteger(j.male) && Number.isInteger(j.female) && (j.male ?? -1) >= 0 && (j.female ?? -1) >= 0 && (j.male ?? 0) + (j.female ?? 0) === j.workersNeeded && !!j.requiredSkills?.length && j.requiredSkills.every(s => SKILLS.includes(s)) && validHours(j.start, j.end);
 }
