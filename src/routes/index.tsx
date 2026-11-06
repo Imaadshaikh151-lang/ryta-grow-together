@@ -9,9 +9,16 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "RYTA — The Farmers App | Farm labour in Karnataka" },
-      { name: "description", content: "RYTA connects farm owners, labour agents and independent labourers in Karnataka. Available in English and Kannada." },
+      {
+        name: "description",
+        content:
+          "RYTA connects farm owners, labour agents and independent labourers in Karnataka. Available in English and Kannada.",
+      },
       { property: "og:title", content: "RYTA — The Farmers App" },
-      { property: "og:description", content: "Farm labour marketplace for Karnataka, in English and Kannada." },
+      {
+        property: "og:description",
+        content: "Farm labour marketplace for Karnataka, in English and Kannada.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -38,8 +45,11 @@ function Index() {
       <h2 className="mb-4 text-xl font-bold">{t("home.whoAreYou")}</h2>
       <div className="space-y-4">
         {roles.map((r) => (
-          <Link key={r.to} to={r.to}
-            className="flex items-center gap-4 rounded-2xl border-2 bg-card p-5 shadow-soft transition active:scale-[0.98] hover:border-primary">
+          <Link
+            key={r.to}
+            to={r.to}
+            className="flex items-center gap-4 rounded-2xl border-2 bg-card p-5 shadow-soft transition active:scale-[0.98] hover:border-primary"
+          >
             <div className="grid size-14 shrink-0 place-items-center rounded-xl bg-harvest text-harvest-foreground">
               <r.icon className="size-7" />
             </div>
@@ -53,10 +63,20 @@ function Index() {
       </div>
       <p className="mt-4 text-sm text-muted-foreground">{t("home.roleNote")}</p>
       <DemoNote />
-      <button onClick={() => { actions.reset(); setResetDone(true); }} className="mt-3 min-h-12 w-full text-sm text-muted-foreground underline">
+      <button
+        onClick={() => {
+          actions.reset();
+          setResetDone(true);
+        }}
+        className="mt-3 min-h-12 w-full text-sm text-muted-foreground underline"
+      >
         {t("demo.reset")}
       </button>
-      {resetDone && <p role="status" className="text-center text-sm font-semibold text-primary">{t("demo.resetDone")}</p>}
+      {resetDone && (
+        <p role="status" className="text-center text-sm font-semibold text-primary">
+          {t("demo.resetDone")}
+        </p>
+      )}
     </Shell>
   );
 }

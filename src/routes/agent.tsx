@@ -1,21 +1,315 @@
-import { createFileRoute } from '@tanstack/react-router';
-import { useState, useRef } from 'react';
-import { Btn, Card, DemoNote, Field, Shell, inputCls } from '@/components/Shell';
-import { JobInfo } from '@/components/JobInfo';
-import { Skills, Requirements, OfferDetails, skillKey } from '@/components/Workforce';
-import { actions, useStore, type TeamMember } from '@/lib/store';
-import { validHours, validRequirements, type Gender } from '@/lib/workforce';
-import { useT } from '@/lib/i18n';
-export const Route = createFileRoute('/agent')({head:()=>({meta:[{title:'Labour agent — Manage your team | RYTA'},{name:'description',content:'Manage a demo farm labour team and propose matching workers on RYTA.'},{property:'og:title',content:'Labour agent | RYTA'},{property:'og:description',content:'Manage workers and propose matching farm teams.'},{property:'og:type',content:'website'},{name:'twitter:card',content:'summary'}]}),component:AgentPage});
-const emptyWorker = (): Omit<TeamMember,'id'> => ({name:'',skills:'',gender:undefined,selectedSkills:[],from:'',until:'',start:'08:00',end:'17:00'});
-function AgentPage(){
- const {t}=useT(); const state=useStore(); const {jobs,agent,team,offers}=state;
- const [a,setA]=useState({name:'',location:''}); const [m,setM]=useState(emptyWorker); const [editing,setEditing]=useState<string|null>(null); const [error,setError]=useState(false); const [msg,setMsg]=useState(''); const nameRef=useRef<HTMLInputElement>(null);
- const [quotes,setQuotes]=useState<Record<string,{distance:string;transport:string;wage:string}>>({});
- if(!agent) return <Shell title={t('role.agent')}><h1 className="mb-1 font-display text-3xl font-bold">{t('agent.setupTitle')}</h1><p className="mb-6 text-lg text-muted-foreground">{t('agent.setupSub')}</p><form className="space-y-5" onSubmit={e=>{e.preventDefault();actions.saveAgent(a)}}><Field label={t('agent.name')}><input required className={inputCls} value={a.name} onChange={e=>setA({...a,name:e.target.value})}/></Field><Field label={t('agent.village')}><input required className={inputCls} placeholder={t('labourer.villagePh')} value={a.location} onChange={e=>setA({...a,location:e.target.value})}/></Field><Btn type="submit">{t('agent.saveContinue')}</Btn></form></Shell>;
- return <Shell title={t('role.agent')}><div className="mb-6"><h1 className="text-xl font-bold">{t('agent.greeting',{name:agent.name})}</h1><p className="text-muted-foreground">{agent.location}</p></div><h2 className="mb-3 text-2xl font-bold">{t('agent.teamTitle',{n:team.length})}</h2>
- <ul className="mb-6 divide-y">{team.map(w=><li key={w.id} className="space-y-2 py-3"><p className="text-lg font-semibold">{w.name} · {w.gender ? t(`wf.${w.gender}`) : '—'}</p><p className="text-muted-foreground">{w.selectedSkills?.map(s=>t(skillKey(s))).join(' · ') || w.skills}</p><p>{w.from || '—'} – {w.until || '—'} · {w.start || '—'}–{w.end || '—'}</p><div className="flex gap-2"><Btn variant="outline" onClick={()=>{setM({...w});setEditing(w.id);setError(false);nameRef.current?.focus()}}>{t('common.edit')}</Btn><Btn variant="outline" onClick={()=>{actions.removeMember(w.id);if(editing===w.id){setEditing(null);setM(emptyWorker())}}}>{t('common.remove')}</Btn></div></li>)}</ul>
- <form className="mb-8 space-y-4 border-y py-5" onSubmit={e=>{e.preventDefault();if(!m.name.trim()||!m.gender||!m.selectedSkills?.length||!validHours(m.start,m.end)||(m.from&&m.until&&m.from>m.until)){setError(true);return} const worker={...m,name:m.name.trim(),skills:(m.selectedSkills??[]).join(', ')};if(editing)actions.editMember(editing,worker);else actions.addMember(worker);setEditing(null);setM(emptyWorker());setError(false);nameRef.current?.focus()}}>
- <h3 className="text-xl font-bold">{t(editing?'common.edit':'wf.quick')}</h3><Field label={t('agent.memberName')}><input ref={nameRef} required className={inputCls} value={m.name} onChange={e=>setM({...m,name:e.target.value})}/></Field><Field label={t('wf.gender')}><select required className={inputCls} value={m.gender??''} onChange={e=>setM({...m,gender:e.target.value as Gender})}><option value="" disabled>—</option><option value="male">{t('wf.male')}</option><option value="female">{t('wf.female')}</option></select></Field><Skills label={t('agent.memberSkills')} value={m.selectedSkills??[]} onChange={selectedSkills=>setM({...m,selectedSkills})}/><p className="text-sm text-muted-foreground">{t('wf.dates')}</p><div className="grid grid-cols-2 gap-3"><Field label={t('wf.from')}><input type="date" className={inputCls} value={m.from??''} onChange={e=>setM({...m,from:e.target.value})}/></Field><Field label={t('wf.until')}><input type="date" className={inputCls} value={m.until??''} onChange={e=>setM({...m,until:e.target.value})}/></Field><Field label={t('wf.start')}><input required type="time" className={inputCls} value={m.start??''} onChange={e=>setM({...m,start:e.target.value})}/></Field><Field label={t('wf.end')}><input required type="time" className={inputCls} value={m.end??''} onChange={e=>setM({...m,end:e.target.value})}/></Field></div>{error&&<p role="alert">{t('wf.rosterInvalid')}</p>}<Btn type="submit">{t(editing?'common.save':'agent.addMember')}</Btn>{editing&&<Btn variant="outline" onClick={()=>{setEditing(null);setM(emptyWorker());setError(false)}}>{t('wf.cancel')}</Btn>}</form>
- <h2 className="mb-4 text-2xl font-bold">{t('agent.jobsTitle')}</h2><div className="space-y-8">{jobs.map(j=>{const offer=offers.find(o=>o.jobId===j.id&&o.agent===agent.name);const q=quotes[j.id]??{distance:offer?String(offer.distance):'',transport:offer?String(offer.transport):'0',wage:String(offer?.wage??j.wage)}; const update=(key:keyof typeof q,value:string)=>setQuotes({...quotes,[j.id]:{...q,[key]:value}});return <section className="space-y-4" key={j.id}><Card><JobInfo job={j}/><Requirements job={j}/></Card>{validRequirements(j)&&offer?.status!=='confirmed'&&<form className="space-y-4" onSubmit={e=>{e.preventDefault();if(actions.submitOffer(j.id,{distance:+q.distance,transport:+q.transport,wage:+q.wage}))setMsg(j.id)}}><Field label={t('wf.distance')}><input required type="number" min="0" step="0.1" className={inputCls} value={q.distance} onChange={e=>update('distance',e.target.value)}/></Field><div className="grid grid-cols-2 gap-3"><Field label={t('wf.wage')}><input required type="number" min="1" className={inputCls} value={q.wage} onChange={e=>update('wage',e.target.value)}/></Field><Field label={t('wf.transport')}><input required type="number" min="0" className={inputCls} value={q.transport} onChange={e=>update('transport',e.target.value)}/></Field></div><Btn type="submit" disabled={!team.length}>{t('wf.submit')}</Btn></form>}{msg===j.id&&<p role="status">{t('wf.sent')}</p>}{offer&&<Card><OfferDetails offer={offer} state={state}/></Card>}</section>})}</div><DemoNote/></Shell>;
+import { createFileRoute } from "@tanstack/react-router";
+import { useState, useRef } from "react";
+import { Btn, Card, DemoNote, Field, Shell, inputCls } from "@/components/Shell";
+import { JobInfo } from "@/components/JobInfo";
+import { Skills, Requirements, OfferDetails, skillKey } from "@/components/Workforce";
+import { actions, useStore, type TeamMember } from "@/lib/store";
+import { validHours, validRequirements, type Gender } from "@/lib/workforce";
+import { useT } from "@/lib/i18n";
+export const Route = createFileRoute("/agent")({
+  head: () => ({
+    meta: [
+      { title: "Labour agent — Manage your team | RYTA" },
+      {
+        name: "description",
+        content: "Manage a demo farm labour team and propose matching workers on RYTA.",
+      },
+      { property: "og:title", content: "Labour agent | RYTA" },
+      { property: "og:description", content: "Manage workers and propose matching farm teams." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+    ],
+  }),
+  component: AgentPage,
+});
+const emptyWorker = (): Omit<TeamMember, "id"> => ({
+  name: "",
+  skills: "",
+  gender: undefined,
+  selectedSkills: [],
+  from: "",
+  until: "",
+  start: "08:00",
+  end: "17:00",
+});
+function AgentPage() {
+  const { t } = useT();
+  const state = useStore();
+  const { jobs, agent, team, offers } = state;
+  const [a, setA] = useState({ name: "", location: "" });
+  const [m, setM] = useState(emptyWorker);
+  const [editing, setEditing] = useState<string | null>(null);
+  const [error, setError] = useState(false);
+  const [msg, setMsg] = useState("");
+  const nameRef = useRef<HTMLInputElement>(null);
+  const [quotes, setQuotes] = useState<
+    Record<string, { distance: string; transport: string; wage: string }>
+  >({});
+  if (!agent)
+    return (
+      <Shell title={t("role.agent")}>
+        <h1 className="mb-1 font-display text-3xl font-bold">{t("agent.setupTitle")}</h1>
+        <p className="mb-6 text-lg text-muted-foreground">{t("agent.setupSub")}</p>
+        <form
+          className="space-y-5"
+          onSubmit={(e) => {
+            e.preventDefault();
+            actions.saveAgent(a);
+          }}
+        >
+          <Field label={t("agent.name")}>
+            <input
+              required
+              className={inputCls}
+              value={a.name}
+              onChange={(e) => setA({ ...a, name: e.target.value })}
+            />
+          </Field>
+          <Field label={t("agent.village")}>
+            <input
+              required
+              className={inputCls}
+              placeholder={t("labourer.villagePh")}
+              value={a.location}
+              onChange={(e) => setA({ ...a, location: e.target.value })}
+            />
+          </Field>
+          <Btn type="submit">{t("agent.saveContinue")}</Btn>
+        </form>
+      </Shell>
+    );
+  return (
+    <Shell title={t("role.agent")}>
+      <div className="mb-6">
+        <h1 className="text-xl font-bold">{t("agent.greeting", { name: agent.name })}</h1>
+        <p className="text-muted-foreground">{agent.location}</p>
+      </div>
+      <h2 className="mb-3 text-2xl font-bold">{t("agent.teamTitle", { n: team.length })}</h2>
+      <ul className="mb-6 divide-y">
+        {team.map((w) => (
+          <li key={w.id} className="space-y-2 py-3">
+            <p className="text-lg font-semibold">
+              {w.name} · {w.gender ? t(`wf.${w.gender}`) : "—"}
+            </p>
+            <p className="text-muted-foreground">
+              {w.selectedSkills?.map((s) => t(skillKey(s))).join(" · ") || w.skills}
+            </p>
+            <p>
+              {w.from || "—"} – {w.until || "—"} · {w.start || "—"}–{w.end || "—"}
+            </p>
+            <div className="flex gap-2">
+              <Btn
+                variant="outline"
+                onClick={() => {
+                  setM({ ...w });
+                  setEditing(w.id);
+                  setError(false);
+                  nameRef.current?.focus();
+                }}
+              >
+                {t("common.edit")}
+              </Btn>
+              <Btn
+                variant="outline"
+                onClick={() => {
+                  actions.removeMember(w.id);
+                  if (editing === w.id) {
+                    setEditing(null);
+                    setM(emptyWorker());
+                  }
+                }}
+              >
+                {t("common.remove")}
+              </Btn>
+            </div>
+          </li>
+        ))}
+      </ul>
+      <form
+        className="mb-8 space-y-4 border-y py-5"
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (
+            !m.name.trim() ||
+            !m.gender ||
+            !m.selectedSkills?.length ||
+            !validHours(m.start, m.end) ||
+            (m.from && m.until && m.from > m.until)
+          ) {
+            setError(true);
+            return;
+          }
+          const worker = { ...m, name: m.name.trim(), skills: (m.selectedSkills ?? []).join(", ") };
+          if (editing) actions.editMember(editing, worker);
+          else actions.addMember(worker);
+          setEditing(null);
+          setM(emptyWorker());
+          setError(false);
+          nameRef.current?.focus();
+        }}
+      >
+        <h3 className="text-xl font-bold">{t(editing ? "common.edit" : "wf.quick")}</h3>
+        <Field label={t("agent.memberName")}>
+          <input
+            ref={nameRef}
+            required
+            className={inputCls}
+            value={m.name}
+            onChange={(e) => setM({ ...m, name: e.target.value })}
+          />
+        </Field>
+        <Field label={t("wf.gender")}>
+          <select
+            required
+            className={inputCls}
+            value={m.gender ?? ""}
+            onChange={(e) => setM({ ...m, gender: e.target.value as Gender })}
+          >
+            <option value="" disabled>
+              —
+            </option>
+            <option value="male">{t("wf.male")}</option>
+            <option value="female">{t("wf.female")}</option>
+          </select>
+        </Field>
+        <Skills
+          label={t("agent.memberSkills")}
+          value={m.selectedSkills ?? []}
+          onChange={(selectedSkills) => setM({ ...m, selectedSkills })}
+        />
+        <p className="text-sm text-muted-foreground">{t("wf.dates")}</p>
+        <div className="grid grid-cols-2 gap-3">
+          <Field label={t("wf.from")}>
+            <input
+              type="date"
+              className={inputCls}
+              value={m.from ?? ""}
+              onChange={(e) => setM({ ...m, from: e.target.value })}
+            />
+          </Field>
+          <Field label={t("wf.until")}>
+            <input
+              type="date"
+              className={inputCls}
+              value={m.until ?? ""}
+              onChange={(e) => setM({ ...m, until: e.target.value })}
+            />
+          </Field>
+          <Field label={t("wf.start")}>
+            <input
+              required
+              type="time"
+              className={inputCls}
+              value={m.start ?? ""}
+              onChange={(e) => setM({ ...m, start: e.target.value })}
+            />
+          </Field>
+          <Field label={t("wf.end")}>
+            <input
+              required
+              type="time"
+              className={inputCls}
+              value={m.end ?? ""}
+              onChange={(e) => setM({ ...m, end: e.target.value })}
+            />
+          </Field>
+        </div>
+        {error && <p role="alert">{t("wf.rosterInvalid")}</p>}
+        <Btn type="submit">{t(editing ? "common.save" : "agent.addMember")}</Btn>
+        {editing && (
+          <Btn
+            variant="outline"
+            onClick={() => {
+              setEditing(null);
+              setM(emptyWorker());
+              setError(false);
+            }}
+          >
+            {t("wf.cancel")}
+          </Btn>
+        )}
+      </form>
+      <h2 className="mb-4 text-2xl font-bold">{t("agent.jobsTitle")}</h2>
+      <div className="space-y-8">
+        {jobs.map((j) => {
+          const offer = offers.find((o) => o.jobId === j.id && o.agent === agent.name);
+          const q = quotes[j.id] ?? {
+            distance: offer ? String(offer.distance) : "",
+            transport: offer ? String(offer.transport) : "0",
+            wage: String(offer?.wage ?? j.wage),
+          };
+          const update = (key: keyof typeof q, value: string) =>
+            setQuotes({ ...quotes, [j.id]: { ...q, [key]: value } });
+          return (
+            <section className="space-y-4" key={j.id}>
+              <Card>
+                <JobInfo job={j} />
+                <Requirements job={j} />
+              </Card>
+              {validRequirements(j) && offer?.status !== "confirmed" && (
+                <form
+                  className="space-y-4"
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    if (
+                      actions.submitOffer(j.id, {
+                        distance: +q.distance,
+                        transport: +q.transport,
+                        wage: +q.wage,
+                      })
+                    )
+                      setMsg(j.id);
+                  }}
+                >
+                  <Field label={t("wf.distance")}>
+                    <input
+                      required
+                      type="number"
+                      min="0"
+                      step="0.1"
+                      className={inputCls}
+                      value={q.distance}
+                      onChange={(e) => update("distance", e.target.value)}
+                    />
+                  </Field>
+                  <div className="grid grid-cols-2 gap-3">
+                    <Field label={t("wf.wage")}>
+                      <input
+                        required
+                        type="number"
+                        min="1"
+                        className={inputCls}
+                        value={q.wage}
+                        onChange={(e) => update("wage", e.target.value)}
+                      />
+                    </Field>
+                    <Field label={t("wf.transport")}>
+                      <input
+                        required
+                        type="number"
+                        min="0"
+                        className={inputCls}
+                        value={q.transport}
+                        onChange={(e) => update("transport", e.target.value)}
+                      />
+                    </Field>
+                  </div>
+                  <Btn type="submit" disabled={!team.length}>
+                    {t("wf.submit")}
+                  </Btn>
+                </form>
+              )}
+              {msg === j.id && <p role="status">{t("wf.sent")}</p>}
+              {offer && (
+                <Card>
+                  <OfferDetails offer={offer} state={state} />
+                </Card>
+              )}
+            </section>
+          );
+        })}
+      </div>
+      <DemoNote />
+    </Shell>
+  );
 }
