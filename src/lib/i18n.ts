@@ -13,7 +13,8 @@ const en = {
   "home.heroTitle": "The Farmers App",
   "home.heroSub": "Find farm workers or farm work near you in Karnataka.",
   "home.whoAreYou": "Who are you?",
-  "home.roleNote": "Picking a role here is only for this demo. There are no accounts or logins yet.",
+  "home.roleNote":
+    "Picking a role here is only for this demo. There are no accounts or logins yet.",
 
   "role.owner": "Farm owner",
   "role.ownerSub": "Post jobs, confirm workers, see costs",
@@ -22,7 +23,8 @@ const en = {
   "role.labourer": "Independent labourer",
   "role.labourerSub": "Find farm work and apply yourself",
 
-  "demo.note": "Demo mode: all jobs, workers and farms are sample data saved only on this phone. They are not real or verified people, and nothing is saved on a server.",
+  "demo.note":
+    "Demo mode: all jobs, workers and farms are sample data saved only on this phone. They are not real or verified people, and nothing is saved on a server.",
   "demo.reset": "Reset demo data",
   "demo.resetDone": "Demo data has been reset.",
   "demo.sample": "Sample",
@@ -59,7 +61,8 @@ const en = {
   "owner.wage": "Daily wage (₹)",
   "owner.workersNeeded": "Workers needed",
   "owner.postJob": "Post job",
-  "owner.posted": "✓ Job posted on this phone (demo). Labourers and agents using this phone can now see it.",
+  "owner.posted":
+    "✓ Job posted on this phone (demo). Labourers and agents using this phone can now see it.",
   "owner.myFarm": "My Farm",
   "owner.applicants": "Applicants ({n})",
   "owner.noApplicants": "No applicants yet.",
@@ -129,7 +132,8 @@ const en = {
   "wf.end": "End time",
   "wf.quick": "Quick add worker",
   "wf.cancel": "Cancel",
-  "wf.invalid": "Male + female workers must equal the total. Select at least one skill and valid working hours.",
+  "wf.invalid":
+    "Male + female workers must equal the total. Select at least one skill and valid working hours.",
   "wf.distance": "Estimated distance (km, demo)",
   "wf.radius": "Maximum search radius (km)",
   "wf.search": "Searching within {n} km · submitted demo offers only",
@@ -139,8 +143,10 @@ const en = {
   "wf.supply": "Available supply: {n} · Male {m} · Female {f}",
   "wf.selected": "Proposed team: {n} · Male {m} · Female {f}",
   "wf.breakdown": "Total {n} · Male {m} · Female {f}",
-  "wf.shortage": "Not suitable: short of {m} male and {f} female workers with all required skills and availability.",
-  "wf.missing": "Workforce requirements are incomplete. Farm owner must edit this job before team matching.",
+  "wf.shortage":
+    "Not suitable: short of {m} male and {f} female workers with all required skills and availability.",
+  "wf.missing":
+    "Workforce requirements are incomplete. Farm owner must edit this job before team matching.",
   "wf.ready": "Matches skills, gender and requested date / hours",
   "wf.confirm": "Confirm proposed team (demo)",
   "wf.labour": "Expected labour cost",
@@ -152,7 +158,8 @@ const en = {
   "wf.unallocated": "{n} workers remain unallocated for this request",
   "wf.submit": "Send / update team offer",
   "wf.sent": "Offer saved on this phone. Review the proposed team below.",
-  "wf.changed": "Offer changed or conflicts with a booking. Review the current team before confirming.",
+  "wf.changed":
+    "Offer changed or conflicts with a booking. Review the current team before confirming.",
   "wf.dates": "Leave dates empty for daily availability.",
   "wf.rosterInvalid": "Choose a gender, at least one skill and valid availability.",
   "wf.confirmedCost": "Confirmed labour + transport cost",
@@ -180,7 +187,8 @@ const kn: Dict = {
   "role.labourer": "ಸ್ವತಂತ್ರ ಕಾರ್ಮಿಕ",
   "role.labourerSub": "ಕೃಷಿ ಕೆಲಸ ಹುಡುಕಿ, ನೀವೇ ಅರ್ಜಿ ಹಾಕಿ",
 
-  "demo.note": "ಡೆಮೊ ಮೋಡ್: ಎಲ್ಲಾ ಕೆಲಸಗಳು, ಕಾರ್ಮಿಕರು ಮತ್ತು ಜಮೀನುಗಳು ಮಾದರಿ ಮಾಹಿತಿ ಮಾತ್ರ, ಈ ಫೋನ್‌ನಲ್ಲಿ ಮಾತ್ರ ಉಳಿಯುತ್ತವೆ. ಇವರು ನಿಜವಾದ ಅಥವಾ ಪರಿಶೀಲಿಸಿದ ವ್ಯಕ್ತಿಗಳಲ್ಲ, ಮತ್ತು ಯಾವುದೂ ಸರ್ವರ್‌ನಲ್ಲಿ ಉಳಿಯುವುದಿಲ್ಲ.",
+  "demo.note":
+    "ಡೆಮೊ ಮೋಡ್: ಎಲ್ಲಾ ಕೆಲಸಗಳು, ಕಾರ್ಮಿಕರು ಮತ್ತು ಜಮೀನುಗಳು ಮಾದರಿ ಮಾಹಿತಿ ಮಾತ್ರ, ಈ ಫೋನ್‌ನಲ್ಲಿ ಮಾತ್ರ ಉಳಿಯುತ್ತವೆ. ಇವರು ನಿಜವಾದ ಅಥವಾ ಪರಿಶೀಲಿಸಿದ ವ್ಯಕ್ತಿಗಳಲ್ಲ, ಮತ್ತು ಯಾವುದೂ ಸರ್ವರ್‌ನಲ್ಲಿ ಉಳಿಯುವುದಿಲ್ಲ.",
   "demo.reset": "ಡೆಮೊ ಮಾಹಿತಿ ಮರುಹೊಂದಿಸಿ",
   "demo.resetDone": "ಡೆಮೊ ಮಾಹಿತಿ ಮರುಹೊಂದಿಸಲಾಗಿದೆ.",
   "demo.sample": "ಮಾದರಿ",
@@ -217,7 +225,8 @@ const kn: Dict = {
   "owner.wage": "ದಿನಗೂಲಿ (₹)",
   "owner.workersNeeded": "ಬೇಕಾದ ಕಾರ್ಮಿಕರು",
   "owner.postJob": "ಕೆಲಸ ಹಾಕಿ",
-  "owner.posted": "✓ ಕೆಲಸವನ್ನು ಈ ಫೋನ್‌ನಲ್ಲಿ ಹಾಕಲಾಗಿದೆ (ಡೆಮೊ). ಈ ಫೋನ್ ಬಳಸುವ ಕಾರ್ಮಿಕರು ಮತ್ತು ಏಜೆಂಟರು ಈಗ ಇದನ್ನು ನೋಡಬಹುದು.",
+  "owner.posted":
+    "✓ ಕೆಲಸವನ್ನು ಈ ಫೋನ್‌ನಲ್ಲಿ ಹಾಕಲಾಗಿದೆ (ಡೆಮೊ). ಈ ಫೋನ್ ಬಳಸುವ ಕಾರ್ಮಿಕರು ಮತ್ತು ಏಜೆಂಟರು ಈಗ ಇದನ್ನು ನೋಡಬಹುದು.",
   "owner.myFarm": "ನನ್ನ ಜಮೀನು",
   "owner.applicants": "ಅರ್ಜಿದಾರರು ({n})",
   "owner.noApplicants": "ಇನ್ನೂ ಯಾರೂ ಅರ್ಜಿ ಹಾಕಿಲ್ಲ.",
@@ -287,7 +296,8 @@ const kn: Dict = {
   "wf.end": "ಮುಗಿಯುವ ಸಮಯ",
   "wf.quick": "ಕಾರ್ಮಿಕರನ್ನು ತ್ವರಿತವಾಗಿ ಸೇರಿಸಿ",
   "wf.cancel": "ರದ್ದುಮಾಡಿ",
-  "wf.invalid": "ಪುರುಷ + ಮಹಿಳಾ ಕಾರ್ಮಿಕರ ಸಂಖ್ಯೆ ಒಟ್ಟು ಸಂಖ್ಯೆಗೆ ಸಮನಾಗಿರಬೇಕು. ಕನಿಷ್ಠ ಒಂದು ಕೌಶಲ್ಯ ಮತ್ತು ಸರಿಯಾದ ಕೆಲಸದ ಸಮಯ ಆಯ್ಕೆಮಾಡಿ.",
+  "wf.invalid":
+    "ಪುರುಷ + ಮಹಿಳಾ ಕಾರ್ಮಿಕರ ಸಂಖ್ಯೆ ಒಟ್ಟು ಸಂಖ್ಯೆಗೆ ಸಮನಾಗಿರಬೇಕು. ಕನಿಷ್ಠ ಒಂದು ಕೌಶಲ್ಯ ಮತ್ತು ಸರಿಯಾದ ಕೆಲಸದ ಸಮಯ ಆಯ್ಕೆಮಾಡಿ.",
   "wf.distance": "ಅಂದಾಜು ದೂರ (ಕಿ.ಮೀ., ಡೆಮೊ)",
   "wf.radius": "ಗರಿಷ್ಠ ಹುಡುಕಾಟದ ವ್ಯಾಪ್ತಿ (ಕಿ.ಮೀ.)",
   "wf.search": "{n} ಕಿ.ಮೀ. ಒಳಗೆ ಹುಡುಕಾಟ · ಸಲ್ಲಿಸಿದ ಡೆಮೊ ಕೊಡುಗೆಗಳು ಮಾತ್ರ",
@@ -297,7 +307,8 @@ const kn: Dict = {
   "wf.supply": "ಲಭ್ಯ ಪೂರೈಕೆ: {n} · ಪುರುಷ {m} · ಮಹಿಳೆ {f}",
   "wf.selected": "ಪ್ರಸ್ತಾವಿತ ತಂಡ: {n} · ಪುರುಷ {m} · ಮಹಿಳೆ {f}",
   "wf.breakdown": "ಒಟ್ಟು {n} · ಪುರುಷ {m} · ಮಹಿಳೆ {f}",
-  "wf.shortage": "ಹೊಂದಿಕೆಯಾಗಿಲ್ಲ: ಎಲ್ಲಾ ಅಗತ್ಯ ಕೌಶಲ್ಯ ಮತ್ತು ಲಭ್ಯತೆ ಇರುವ {m} ಪುರುಷ ಹಾಗೂ {f} ಮಹಿಳಾ ಕಾರ್ಮಿಕರ ಕೊರತೆ.",
+  "wf.shortage":
+    "ಹೊಂದಿಕೆಯಾಗಿಲ್ಲ: ಎಲ್ಲಾ ಅಗತ್ಯ ಕೌಶಲ್ಯ ಮತ್ತು ಲಭ್ಯತೆ ಇರುವ {m} ಪುರುಷ ಹಾಗೂ {f} ಮಹಿಳಾ ಕಾರ್ಮಿಕರ ಕೊರತೆ.",
   "wf.missing": "ಕಾರ್ಮಿಕ ಅಗತ್ಯಗಳು ಅಪೂರ್ಣವಾಗಿವೆ. ತಂಡ ಹೊಂದಾಣಿಕೆಗೆ ಮೊದಲು ಮಾಲೀಕರು ಕೆಲಸವನ್ನು ಬದಲಿಸಬೇಕು.",
   "wf.ready": "ಕೌಶಲ್ಯ, ಲಿಂಗ ಮತ್ತು ಬೇಕಾದ ದಿನ / ಸಮಯಕ್ಕೆ ಹೊಂದಿಕೆಯಾಗುತ್ತದೆ",
   "wf.confirm": "ಪ್ರಸ್ತಾವಿತ ತಂಡ ಖಚಿತಪಡಿಸಿ (ಡೆಮೊ)",
@@ -335,7 +346,9 @@ const listeners = new Set<() => void>();
 
 export function setLang(l: Lang) {
   current = l;
-  try { localStorage.setItem(KEY, l); } catch {}
+  try {
+    localStorage.setItem(KEY, l);
+  } catch {}
   listeners.forEach((fn) => fn());
 }
 
@@ -347,14 +360,26 @@ function subscribe(fn: () => void) {
   }
   listeners.add(fn);
   fn();
-  return () => { listeners.delete(fn); };
+  return () => {
+    listeners.delete(fn);
+  };
 }
 
 export function useT() {
-  const lang = useSyncExternalStore(subscribe, () => current, () => "en" as Lang);
-  useEffect(() => { document.documentElement.lang = lang === "kn" ? "kn" : "en-IN"; }, [lang]);
+  const lang = useSyncExternalStore(
+    subscribe,
+    () => current,
+    () => "en" as Lang,
+  );
+  useEffect(() => {
+    document.documentElement.lang = lang === "kn" ? "kn" : "en-IN";
+  }, [lang]);
   const t = (key: TKey, vars?: Record<string, string | number>) => translate(lang, key, vars);
   const date = (d: string) =>
-    new Date(d + "T00:00:00").toLocaleDateString(lang === "kn" ? "kn-IN" : "en-IN", { day: "numeric", month: "short", weekday: "short" });
+    new Date(d + "T00:00:00").toLocaleDateString(lang === "kn" ? "kn-IN" : "en-IN", {
+      day: "numeric",
+      month: "short",
+      weekday: "short",
+    });
   return { lang, t, date };
 }
