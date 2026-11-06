@@ -2,6 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { Btn, Card, DemoNote, Field, Shell, inputCls } from "@/components/Shell";
 import { JobInfo } from "@/components/JobInfo";
+import { Skills } from "@/components/Workforce";
+import type { Gender } from "@/lib/workforce";
 import { actions, AVAILABILITY, useStore, type Availability, type Profile } from "@/lib/store";
 import { useT } from "@/lib/i18n";
 
@@ -33,6 +35,8 @@ function Labourer() {
         <form className="space-y-5" onSubmit={(e) => { e.preventDefault(); actions.saveProfile(p); setEditing(false); }}>
           <Field label={t("labourer.name")}><input required className={inputCls} value={p.name} onChange={(e) => setP({ ...p, name: e.target.value })} /></Field>
           <Field label={t("labourer.skills")}><input required className={inputCls} placeholder={t("labourer.skillsPh")} value={p.skills} onChange={(e) => setP({ ...p, skills: e.target.value })} /></Field>
+          <Field label={t("wf.gender")}><select required className={inputCls} value={p.gender ?? ""} onChange={e => setP({...p,gender:e.target.value as Gender})}><option value="" disabled>—</option><option value="male">{t("wf.male")}</option><option value="female">{t("wf.female")}</option></select></Field>
+          <Skills value={p.selectedSkills ?? []} onChange={selectedSkills => setP({...p,selectedSkills,skills:selectedSkills.join(", ")})}/>
           <Field label={t("labourer.village")}><input required className={inputCls} placeholder={t("labourer.villagePh")} value={p.location} onChange={(e) => setP({ ...p, location: e.target.value })} /></Field>
           <Field label={t("labourer.availability")}>
             <select className={inputCls} value={p.availability} onChange={(e) => setP({ ...p, availability: e.target.value as Availability })}>

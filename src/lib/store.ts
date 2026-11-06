@@ -1,5 +1,5 @@
 import { useSyncExternalStore } from "react";
-import { allocate, validRequirements, type Workforce, type WorkerDetails, type Skill } from "@/lib/workforce";
+import { allocate, validRequirements, validWorker, type Workforce, type WorkerDetails, type Skill } from "@/lib/workforce";
 
 export type Job = {
   id: string;
@@ -27,7 +27,7 @@ export type Application = {
   selectedSkills?: Skill[] | undefined;
 };
 export type Availability = "everyday" | "weekdays" | "weekends" | "thisMonth";
-export type Profile = { name: string; skills: string; location: string; availability: Availability };
+export type Profile = { name: string; skills: string; location: string; availability: Availability } & WorkerDetails;
 export type TeamMember = { id: string; name: string; skills: string } & WorkerDetails;
 export type Agent = { name: string; location: string };
 export type Offer = { id: string; jobId: string; agent: string; distance: number; transport: number; wage: number; memberIds: string[]; signature: string; status: "proposed" | "confirmed"; workers: TeamMember[] };
@@ -104,11 +104,11 @@ export const actions = {
   apply: (jobId: string) => {
     const p = state.profile;
     if (!p || state.applications.some((a) => a.jobId === jobId && !a.agent && a.workerName === p.name)) return;
-    set({ applications: [...state.applications, { id: uid(), jobId, workerName: p.name, skills: p.skills, location: p.location, status: "applied" }] });
+    set({ applications: [...state.applications, { id: uid(), jobId, workerName: p.name, skills: p.skills, selectedSkills:p.selectedSkills, gender:p.gender, location: p.location, status: "applied" }] });
   },
   saveAgent: (a: Agent) => set({ agent: a }),
-  addMember: (m: Omit<TeamMember, "id">) => set({ team: [...state.team, { ...m, id: uid() }] }),
-  editMember: (id: string, m: Omit<TeamMember, "id">) => set({ team: state.team.map(old => old.id === id ? { ...m, id } : old) }),
+  addMember: (m: Omit<TeamMember, "id">) => { if (validWorker(m)) set({ team: [...state.team, { ...m, id: uid() }] }); },
+  editMember: (id: string, m: Omit<TeamMember, "id">) => { if (validWorker(m)) set({ team: state.team.map(old => old.id === id ? { ...m, id } : old) }); },
   removeMember: (id: string) => set({ team: state.team.filter((m) => m.id !== id) }),
   setRadius: (n: number) => { if (Number.isFinite(n) && n >= 20) set({ maxRadius: n }); },
   submitOffer: (jobId: string, quote: { distance: number; transport: number; wage: number }) => {
