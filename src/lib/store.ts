@@ -30,7 +30,7 @@ export type Availability = "everyday" | "weekdays" | "weekends" | "thisMonth";
 export type Profile = { name: string; skills: string; location: string; availability: Availability } & WorkerDetails;
 export type TeamMember = { id: string; name: string; skills: string } & WorkerDetails;
 export type Agent = { name: string; location: string };
-export type Offer = { id: string; jobId: string; agent: string; distance: number; transport: number; wage: number; memberIds: string[]; signature: string; status: "proposed" | "confirmed"; workers: TeamMember[] };
+export type Offer = { id: string; jobId: string; agent: string; distance: number; transport: number; wage: number; memberIds: string[]; signature: string; status: "proposed" | "confirmed"; workers: TeamMember[]; supply?: TeamMember[] };
 export type State = { jobs: Job[]; applications: Application[]; profile: Profile | null; agent: Agent | null; team: TeamMember[]; offers: Offer[]; maxRadius: number };
 
 export const WORK_TYPES = ["Harvesting", "Sowing", "Weeding", "Ploughing", "Spraying", "Coffee picking", "Irrigation"] as const;
@@ -118,7 +118,7 @@ export const actions = {
     const old = state.offers.find(o => o.jobId === jobId && o.agent === agent.name);
     if (old?.status === "confirmed") return false;
     const result = allocate(job, state.team, state.jobs, state.applications);
-    const offer: Offer = { ...quote, id: old?.id ?? uid(), jobId, agent: agent.name, memberIds: result.selected.map(w => w.id), signature: result.signature, status: "proposed", workers: result.selected.map(w => ({ ...w, selectedSkills: [...(w.selectedSkills ?? [])] })) };
+    const offer: Offer = { ...quote, id: old?.id ?? uid(), jobId, agent: agent.name, memberIds: result.selected.map(w => w.id), signature: result.signature, status: "proposed", workers: result.selected.map(w => ({ ...w, selectedSkills: [...(w.selectedSkills ?? [])] })), supply: result.available.map(w => ({ ...w, selectedSkills: [...(w.selectedSkills ?? [])] })) };
     set({ offers: [...state.offers.filter(o => o.id !== offer.id), offer] }); return true;
   },
   confirmOffer: (id: string) => {
