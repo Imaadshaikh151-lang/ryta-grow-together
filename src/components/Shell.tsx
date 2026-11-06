@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import type { ReactNode } from "react";
+import { useId, type ReactNode } from "react";
 import { LANGS, setLang, useT, type Lang } from "@/lib/i18n";
 
 export function LanguageSwitch() {
@@ -58,9 +58,10 @@ export function Btn({
 }
 
 export function Field({ label, children }: { label: string; children: ReactNode }) {
+  const id = useId();
   return (
     <label className="block">
-      <span className="mb-1.5 block text-base font-semibold">{label}</span>
+      <span id={id} className="mb-1.5 block text-base font-semibold">{label}</span>
       {children}
     </label>
   );
