@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { useId, type ReactNode } from "react";
+import { cloneElement, isValidElement, useId, type ReactElement, type ReactNode } from "react";
 import { LANGS, setLang, useT, type Lang } from "@/lib/i18n";
 
 export function LanguageSwitch() {
@@ -62,7 +62,7 @@ export function Field({ label, children }: { label: string; children: ReactNode 
   return (
     <label className="block">
       <span id={id} className="mb-1.5 block text-base font-semibold">{label}</span>
-      {children}
+      {isValidElement(children) ? cloneElement(children as ReactElement<{ "aria-labelledby"?: string }>, { "aria-labelledby": id }) : children}
     </label>
   );
 }
