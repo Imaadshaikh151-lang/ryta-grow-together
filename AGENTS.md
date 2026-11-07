@@ -13,3 +13,4 @@
 - Demo data lives only in browser storage via `src/lib/store.ts`; sample records carry `sample: true` and are labelled — the app has no backend yet.
 - Workforce matching is a pure shared module; offers are separate from jobs and confirmed applications retain worker snapshots, enabling deterministic allocation and atomic demo team confirmation.
 - Provider distance is explicitly entered as a demo estimate, never inferred from village names; discovery operates only on submitted local offers.
+- Owner summary cards and expandable details are presentation-only modules; they reuse existing store actions and allocation results, keeping other role screens and marketplace rules unchanged.
