@@ -25,12 +25,12 @@ export function LanguageSwitch() {
   );
 }
 
-export function Shell({ title, children }: { title?: string; children: ReactNode }) {
+export function Shell({ title, children, wide = false }: { title?: string; children: ReactNode; wide?: boolean }) {
   const { t } = useT();
   return (
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-10 border-b bg-primary text-primary-foreground">
-        <div className="mx-auto flex max-w-xl items-center justify-between gap-3 px-4 py-2.5">
+        <div className={`mx-auto flex ${wide ? "max-w-5xl" : "max-w-xl"} items-center justify-between gap-3 px-4 py-2.5`}>
           <Link to="/" aria-label={t("nav.home")} className="leading-none">
             <span className="font-display text-2xl font-bold tracking-tight">
               RYTA<span className="text-harvest">.</span>
@@ -40,12 +40,12 @@ export function Shell({ title, children }: { title?: string; children: ReactNode
           <LanguageSwitch />
         </div>
         {title && (
-          <div className="mx-auto max-w-xl px-4 pb-2.5 text-base font-semibold opacity-95">
+          <div className={`mx-auto ${wide ? "max-w-5xl" : "max-w-xl"} px-4 pb-2.5 text-base font-semibold opacity-95`}>
             {title}
           </div>
         )}
       </header>
-      <main className="mx-auto max-w-xl px-4 py-6 pb-16">{children}</main>
+      <main className={`mx-auto ${wide ? "max-w-5xl" : "max-w-xl"} px-4 py-6 pb-16`}>{children}</main>
     </div>
   );
 }
