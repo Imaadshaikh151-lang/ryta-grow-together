@@ -25,7 +25,8 @@ export type Application = {
   workerName: string;
   skills: string;
   location: string;
-  status: "applied" | "confirmed";
+  status: "applied" | "confirmed" | "cancelled";
+  cancelled?: Cancellation;
   agent?: string; // set when applied through a labour agent's team
   memberId?: string;
   sample?: boolean;
@@ -33,6 +34,9 @@ export type Application = {
   gender?: "male" | "female" | undefined;
   selectedSkills?: Skill[] | undefined;
 };
+export type Role = "owner" | "agent" | "labourer";
+export type Actor = { role: Role; name: string };
+export type Cancellation = Actor & { at: string };
 export type Availability = "everyday" | "weekdays" | "weekends" | "thisMonth";
 export type Profile = {
   name: string;
@@ -51,7 +55,8 @@ export type Offer = {
   wage: number;
   memberIds: string[];
   signature: string;
-  status: "proposed" | "confirmed";
+  status: "proposed" | "confirmed" | "cancelled";
+  cancelled?: Cancellation;
   workers: TeamMember[];
   supply?: TeamMember[];
 };
@@ -194,6 +199,31 @@ export function useStore() {
   );
 }
 
+/** A booking is completed once its work date has passed (derived, never stored). */
+export const isCompleted = (job: Pick<Job, "date"> | undefined, now = new Date()) =>
+  !!job && job.date < now.toISOString().slice(0, 10);
+const hasHistory = (s: State, jobId: string) =>
+  s.applications.some((a) => a.jobId === jobId && a.status !== "applied") ||
+  s.offers.some((o) => o.jobId === jobId && o.status !== "proposed");
+/** Owner may delete only their own (non-sample) jobs with no confirmed/cancelled history. */
+export const canDeleteJob = (s: State, job: Job) => !job.sample && !hasHistory(s, job.id);
+/** Only labelled sample cards without booking history; user records, profiles and rosters stay. */
+export function sampleCleanup(s: State) {
+  const applications = s.applications.filter((a) => !(a.sample && a.status === "applied"));
+  const jobs = s.jobs.filter(
+    (j) =>
+      !j.sample ||
+      applications.some((a) => a.jobId === j.id) ||
+      s.offers.some((o) => o.jobId === j.id),
+  );
+  return {
+    jobs,
+    applications,
+    removedJobs: s.jobs.length - jobs.length,
+    removedApps: s.applications.length - applications.length,
+  };
+}
+const stamp = (by: Actor): Cancellation => ({ ...by, at: new Date().toISOString() });
 const uid = () => Math.random().toString(36).slice(2, 9);
 const confirmedCount = (jobId: string) =>
   state.applications.filter((a) => a.jobId === jobId && a.status === "confirmed").length;
@@ -264,7 +294,9 @@ export const actions = {
       quote.wage <= 0
     )
       return false;
-    const old = state.offers.find((o) => o.jobId === jobId && o.agent === agent.name);
+    const old = state.offers.find(
+      (o) => o.jobId === jobId && o.agent === agent.name && o.status !== "cancelled",
+    );
     if (old?.status === "confirmed") return false;
     const result = allocate(job, state.team, state.jobs, state.applications);
     const offer: Offer = {
@@ -326,7 +358,7 @@ export const actions = {
   confirm: (id: string) => {
     const app = state.applications.find((a) => a.id === id);
     const job = app && state.jobs.find((j) => j.id === app.jobId);
-    if (!app || !job || app.status === "confirmed" || confirmedCount(job.id) >= job.workersNeeded)
+    if (!app || !job || app.status !== "applied" || confirmedCount(job.id) >= job.workersNeeded)
       return;
     if (
       app.agent ||
@@ -343,6 +375,67 @@ export const actions = {
         a.id === id ? { ...a, status: "confirmed" } : a,
       ),
     });
+  },
+  deleteJob: (id: string) => {
+    const job = state.jobs.find((j) => j.id === id);
+    if (!job || !canDeleteJob(state, job)) return false;
+    set({
+      jobs: state.jobs.filter((j) => j.id !== id),
+      applications: state.applications.filter((a) => a.jobId !== id),
+      offers: state.offers.filter((o) => o.jobId !== id),
+    });
+    return true;
+  },
+  deleteOffer: (id: string, agentName: string) => {
+    const offer = state.offers.find((o) => o.id === id);
+    if (!offer || offer.agent !== agentName || offer.status !== "proposed") return false;
+    set({ offers: state.offers.filter((o) => o.id !== id) });
+    return true;
+  },
+  withdrawApplication: (id: string, workerName: string) => {
+    const app = state.applications.find((a) => a.id === id);
+    if (!app || app.agent || app.workerName !== workerName || app.status !== "applied")
+      return false;
+    set({ applications: state.applications.filter((a) => a.id !== id) });
+    return true;
+  },
+  /** Individual (non-team) bookings: the farm owner or the labourer themself. */
+  cancelApplication: (id: string, by: Actor) => {
+    const app = state.applications.find((a) => a.id === id);
+    const job = app && state.jobs.find((j) => j.id === app.jobId);
+    if (!app || !job || app.agent || app.status !== "confirmed" || isCompleted(job)) return false;
+    if (by.role === "agent" || (by.role === "labourer" && app.workerName !== by.name))
+      return false;
+    set({
+      applications: state.applications.map((a) =>
+        a.id === id ? { ...a, status: "cancelled", cancelled: stamp(by) } : a,
+      ),
+    });
+    return true;
+  },
+  /** Team bookings: the farm owner or the agent who made the offer; worker records are kept. */
+  cancelOffer: (id: string, by: Actor) => {
+    const offer = state.offers.find((o) => o.id === id);
+    const job = offer && state.jobs.find((j) => j.id === offer.jobId);
+    if (!offer || !job || offer.status !== "confirmed" || isCompleted(job)) return false;
+    if (by.role === "labourer" || (by.role === "agent" && offer.agent !== by.name)) return false;
+    const c = stamp(by);
+    set({
+      offers: state.offers.map((o) =>
+        o.id === id ? { ...o, status: "cancelled", cancelled: c } : o,
+      ),
+      applications: state.applications.map((a) =>
+        a.offerId === id && a.status === "confirmed"
+          ? { ...a, status: "cancelled", cancelled: c }
+          : a,
+      ),
+    });
+    return true;
+  },
+  clearSamples: () => {
+    const r = sampleCleanup(state);
+    set({ jobs: r.jobs, applications: r.applications });
+    return r;
   },
   reset: () => set(seed()),
 };
