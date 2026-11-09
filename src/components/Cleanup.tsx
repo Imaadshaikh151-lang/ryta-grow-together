@@ -95,7 +95,7 @@ export type HistoryItem = {
   title: string;
   sub: string;
   date: string;
-  cancelled?: Cancellation;
+  cancelled?: Cancellation | undefined;
 };
 
 export function History({ items }: { items: HistoryItem[] }) {
