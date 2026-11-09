@@ -26,7 +26,7 @@ export type Application = {
   skills: string;
   location: string;
   status: "applied" | "confirmed" | "cancelled";
-  cancelled?: Cancellation;
+  cancelled?: Cancellation | undefined;
   agent?: string; // set when applied through a labour agent's team
   memberId?: string;
   sample?: boolean;
@@ -56,7 +56,7 @@ export type Offer = {
   memberIds: string[];
   signature: string;
   status: "proposed" | "confirmed" | "cancelled";
-  cancelled?: Cancellation;
+  cancelled?: Cancellation | undefined;
   workers: TeamMember[];
   supply?: TeamMember[];
 };

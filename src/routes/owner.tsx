@@ -7,9 +7,10 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skills, OfferDetails } from "@/components/Workforce";
 import { OwnerJobCard, OwnerOfferCard } from "@/components/OwnerCards";
 import { OwnerJobDetails } from "@/components/OwnerDetails";
+import { CancelBooking, History } from "@/components/Cleanup";
 import { OwnerSummary } from "@/components/OwnerSummary";
 import { allocate, discover, validRequirements, type Skill } from "@/lib/workforce";
-import { actions, useStore, WORK_TYPES, type Job } from "@/lib/store";
+import { actions, isCompleted, useStore, WORK_TYPES, type Job } from "@/lib/store";
 import { useT, type TKey } from "@/lib/i18n";
 
 export const Route = createFileRoute("/owner")({
@@ -43,7 +44,39 @@ const nav = [
 function Owner() {
   const { t } = useT();
   const state = useStore();
-  const { jobs, offers, applications, maxRadius } = state;
+  const { jobs, applications, maxRadius } = state;
+  const offers = state.offers.filter((o) => o.status !== "cancelled");
+  const history = [
+    ...state.offers
+      .filter(
+        (o) =>
+          o.status === "cancelled" ||
+          (o.status === "confirmed" && isCompleted(jobs.find((j) => j.id === o.jobId))),
+      )
+      .map((o) => ({ o, j: jobs.find((j) => j.id === o.jobId) }))
+      .filter((x) => x.j)
+      .map(({ o, j }) => ({
+        id: o.id,
+        title: j!.title,
+        sub: `${o.agent} · ${o.workers.length}`,
+        date: j!.date,
+        cancelled: o.cancelled,
+      })),
+    ...applications
+      .filter((a) => !a.agent)
+      .map((a) => ({ a, j: jobs.find((j) => j.id === a.jobId) }))
+      .filter(
+        ({ a, j }) =>
+          j && (a.status === "cancelled" || (a.status === "confirmed" && isCompleted(j))),
+      )
+      .map(({ a, j }) => ({
+        id: a.id,
+        title: j!.title,
+        sub: a.workerName,
+        date: j!.date,
+        cancelled: a.cancelled,
+      })),
+  ];
   const [tab, setTab] = useState<Tab>("jobs");
   const [posted, setPosted] = useState(false);
   const [editing, setEditing] = useState<string | null>(null);
@@ -206,6 +239,7 @@ function Owner() {
               ))}
             </div>
             <OwnerSummary state={state} />
+            <History items={history} />
           </>
         ))}
       {tab === "post" && (
@@ -388,6 +422,19 @@ function Owner() {
               state={state}
               onConfirm={() => setOfferError(!actions.confirmOffer(activeOffer.id))}
             />
+            {activeOffer.status === "confirmed" && !isCompleted(offerJob) && (
+              <CancelBooking
+                name={activeOffer.agent}
+                onConfirm={() => {
+                  const ok = actions.cancelOffer(activeOffer.id, {
+                    role: "owner",
+                    name: t("owner.myFarm"),
+                  });
+                  if (ok) setOfferDetail(null);
+                  return ok;
+                }}
+              />
+            )}
           </div>
         ) : (
           <>

@@ -2,7 +2,8 @@ import { ArrowUpRight, CalendarDays, MapPin, Users, Handshake } from "lucide-rea
 import { Button } from "@/components/ui/button";
 import { Status } from "@/components/Shell";
 import { useT } from "@/lib/i18n";
-import { rupees, type Job, type Offer, type State } from "@/lib/store";
+import { DeleteCard } from "@/components/Cleanup";
+import { actions, canDeleteJob, rupees, type Job, type Offer, type State } from "@/lib/store";
 import { allocate, validRequirements } from "@/lib/workforce";
 
 export function DailyRates({ wage }: { wage: number }) {
@@ -80,8 +81,13 @@ export function OwnerJobCard({
       <div className="mt-auto flex flex-wrap items-center justify-between gap-2 border-t pt-3">
         <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
           <Handshake className="size-4" />
-          {t("od.offersCount", { n: state.offers.filter((o) => o.jobId === job.id).length })}
+          {t("od.offersCount", {
+            n: state.offers.filter((o) => o.jobId === job.id && o.status !== "cancelled").length,
+          })}
         </span>
+        {canDeleteJob(state, job) && (
+          <DeleteCard name={job.title} onConfirm={() => actions.deleteJob(job.id)} />
+        )}
         <Button variant="ghost" className="min-h-11 text-primary" onClick={onOpen}>
           {t("od.viewJob")}
           <ArrowUpRight />

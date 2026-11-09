@@ -3,7 +3,8 @@ import { useState, useRef } from "react";
 import { Btn, Card, DemoNote, Field, Shell, inputCls } from "@/components/Shell";
 import { JobInfo } from "@/components/JobInfo";
 import { Skills, Requirements, OfferDetails, skillKey } from "@/components/Workforce";
-import { actions, useStore, type TeamMember } from "@/lib/store";
+import { CancelBooking, DeleteCard, History } from "@/components/Cleanup";
+import { actions, isCompleted, useStore, type TeamMember } from "@/lib/store";
 import { validHours, validRequirements, type Gender } from "@/lib/workforce";
 import { useT } from "@/lib/i18n";
 export const Route = createFileRoute("/agent")({
@@ -232,7 +233,9 @@ function AgentPage() {
       <h2 className="mb-4 text-2xl font-bold">{t("agent.jobsTitle")}</h2>
       <div className="space-y-8">
         {jobs.map((j) => {
-          const offer = offers.find((o) => o.jobId === j.id && o.agent === agent.name);
+          const offer = offers.find(
+            (o) => o.jobId === j.id && o.agent === agent.name && o.status !== "cancelled",
+          );
           const q = quotes[j.id] ?? {
             distance: offer ? String(offer.distance) : "",
             transport: offer ? String(offer.transport) : "0",
@@ -303,12 +306,42 @@ function AgentPage() {
               {offer && (
                 <Card>
                   <OfferDetails offer={offer} state={state} />
+                  {offer.status === "proposed" && (
+                    <DeleteCard
+                      name={`${t("wf.offer", { name: agent.name })} – ${j.title}`}
+                      onConfirm={() => actions.deleteOffer(offer.id, agent.name)}
+                    />
+                  )}
+                  {offer.status === "confirmed" && !isCompleted(j) && (
+                    <CancelBooking
+                      name={j.title}
+                      onConfirm={() =>
+                        actions.cancelOffer(offer.id, { role: "agent", name: agent.name })
+                      }
+                    />
+                  )}
                 </Card>
               )}
             </section>
           );
         })}
       </div>
+      <History
+        items={offers
+          .filter((o) => o.agent === agent.name)
+          .map((o) => ({ o, j: jobs.find((j) => j.id === o.jobId) }))
+          .filter(
+            ({ o, j }) =>
+              j && (o.status === "cancelled" || (o.status === "confirmed" && isCompleted(j))),
+          )
+          .map(({ o, j }) => ({
+            id: o.id,
+            title: j!.title,
+            sub: `${j!.location} · ${o.workers.length}`,
+            date: j!.date,
+            cancelled: o.cancelled,
+          }))}
+      />
       <DemoNote />
     </Shell>
   );

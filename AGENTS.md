@@ -14,3 +14,4 @@
 - Workforce matching is a pure shared module; offers are separate from jobs and confirmed applications retain worker snapshots, enabling deterministic allocation and atomic demo team confirmation.
 - Provider distance is explicitly entered as a demo estimate, never inferred from village names; discovery operates only on submitted local offers.
 - Owner summary cards and expandable details are presentation-only modules; they reuse existing store actions and allocation results, keeping other role screens and marketplace rules unchanged.
+- Deletion is limited to unconfirmed cards owned by the acting role (checked in store actions); confirmed bookings are cancelled with who/when, never erased; "completed" is derived from a past work date — preserves booking history.

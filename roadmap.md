@@ -3,4 +3,4 @@
 - [x] Add separate offers, deterministic allocation, distance discovery and atomic team confirmation.
 - [x] Test rules and existing mobile/language flows; report limitations (manual estimated distances, submitted local offers only, legacy jobs need requirements).
 - [x] Restructure only the owner dashboard into My Jobs, Post Job and Offers, retaining summary and detailed actions.
-- [x] Verify desktop/mobile, both languages, job creation and unchanged agent/labourer flows.
+- [x] Verify desktop/mobile, both languages, job creation and unchanged agent/labourer flows.- [x] Delete/withdraw, cancel-with-history, History sections and safe "Clear sample cards" for all three roles.

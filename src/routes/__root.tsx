@@ -1,3 +1,4 @@
+import { Toaster } from "@/components/ui/sonner";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   Outlet,
@@ -79,7 +80,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "RYTA — The Farmers App" },
-      { name: "description", content: "Farm labour marketplace for Karnataka, in English and Kannada." },
+      {
+        name: "description",
+        content: "Farm labour marketplace for Karnataka, in English and Kannada.",
+      },
       { name: "theme-color", content: "#3b6b3f" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -91,7 +95,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         href: appCss,
       },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
-      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Baloo+Tamma+2:wght@600;700&family=Figtree:wght@400;500;600;700&family=Noto+Sans+Kannada:wght@400;500;600;700&family=Outfit:wght@600;700&display=swap" },
+      {
+        rel: "stylesheet",
+        href: "https://fonts.googleapis.com/css2?family=Baloo+Tamma+2:wght@600;700&family=Figtree:wght@400;500;600;700&family=Noto+Sans+Kannada:wght@400;500;600;700&family=Outfit:wght@600;700&display=swap",
+      },
       { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
     ],
   }),
@@ -109,6 +116,7 @@ function RootShell({ children }: { children: ReactNode }) {
       </head>
       <body>
         {children}
+        <Toaster />
         <Scripts />
       </body>
     </html>
