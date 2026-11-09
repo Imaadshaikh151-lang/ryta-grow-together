@@ -4,7 +4,15 @@ import { Btn, Card, DemoNote, Field, Shell, inputCls } from "@/components/Shell"
 import { JobInfo } from "@/components/JobInfo";
 import { Skills } from "@/components/Workforce";
 import type { Gender } from "@/lib/workforce";
-import { actions, AVAILABILITY, useStore, type Availability, type Profile } from "@/lib/store";
+import { CancelBooking, ConfirmAction, History } from "@/components/Cleanup";
+import {
+  actions,
+  isCompleted,
+  AVAILABILITY,
+  useStore,
+  type Availability,
+  type Profile,
+} from "@/lib/store";
 import { useT } from "@/lib/i18n";
 
 export const Route = createFileRoute("/labourer")({
@@ -144,12 +152,38 @@ function Labourer() {
           return (
             <Card key={j.id}>
               <JobInfo job={j} />
-              {mine ? (
-                <div
-                  className={`rounded-xl p-3 text-center text-lg font-semibold ${mine.status === "confirmed" ? "bg-status-confirmed text-status-confirmed-foreground" : "bg-status-applied text-status-applied-foreground"}`}
-                >
-                  {mine.status === "confirmed" ? t("labourer.youConfirmed") : t("labourer.applied")}
+              {mine?.status === "cancelled" ? (
+                <div className="rounded-xl bg-muted p-3 text-center text-lg font-semibold text-muted-foreground">
+                  {t("cl.cancelled")}
                 </div>
+              ) : mine ? (
+                <>
+                  <div
+                    className={`rounded-xl p-3 text-center text-lg font-semibold ${mine.status === "confirmed" ? "bg-status-confirmed text-status-confirmed-foreground" : "bg-status-applied text-status-applied-foreground"}`}
+                  >
+                    {mine.status === "confirmed"
+                      ? t("labourer.youConfirmed")
+                      : t("labourer.applied")}
+                  </div>
+                  {mine.status === "applied" && (
+                    <ConfirmAction
+                      label={t("cl.withdraw")}
+                      title={t("cl.withdrawTitle")}
+                      body={t("cl.deleteBody", { name: j.title })}
+                      confirm={t("cl.withdraw")}
+                      done={t("cl.withdrawn")}
+                      onConfirm={() => actions.withdrawApplication(mine.id, profile.name)}
+                    />
+                  )}
+                  {mine.status === "confirmed" && !isCompleted(j) && (
+                    <CancelBooking
+                      name={j.title}
+                      onConfirm={() =>
+                        actions.cancelApplication(mine.id, { role: "labourer", name: profile.name })
+                      }
+                    />
+                  )}
+                </>
               ) : (
                 <Btn variant="harvest" onClick={() => actions.apply(j.id)}>
                   {t("labourer.apply")}
@@ -159,6 +193,22 @@ function Labourer() {
           );
         })}
       </div>
+      <History
+        items={applications
+          .filter((a) => !a.agent && a.workerName === profile.name)
+          .map((a) => ({ a, j: jobs.find((j) => j.id === a.jobId) }))
+          .filter(
+            ({ a, j }) =>
+              j && (a.status === "cancelled" || (a.status === "confirmed" && isCompleted(j))),
+          )
+          .map(({ a, j }) => ({
+            id: a.id,
+            title: j!.title,
+            sub: j!.location,
+            date: j!.date,
+            cancelled: a.cancelled,
+          }))}
+      />
       <DemoNote />
     </Shell>
   );

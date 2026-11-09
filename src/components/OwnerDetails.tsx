@@ -4,7 +4,8 @@ import { JobInfo } from "@/components/JobInfo";
 import { Requirements } from "@/components/Workforce";
 import { DailyRates } from "@/components/OwnerCards";
 import { Button } from "@/components/ui/button";
-import { actions, type Job, type State } from "@/lib/store";
+import { CancelBooking } from "@/components/Cleanup";
+import { actions, isCompleted, type Job, type State } from "@/lib/store";
 import { validRequirements } from "@/lib/workforce";
 import { useT } from "@/lib/i18n";
 
@@ -48,11 +49,23 @@ export function OwnerJobDetails({
                   {a.skills} · {a.location}
                 </p>
               </div>
-              {a.status === "confirmed" ? (
-                <Status kind="confirmed">
-                  <Check className="size-4" />
-                  {t("owner.confirmed")}
-                </Status>
+              {a.status === "cancelled" ? (
+                <Status kind="sample">{t("cl.cancelled")}</Status>
+              ) : a.status === "confirmed" ? (
+                <div className="flex flex-wrap items-center gap-2">
+                  <Status kind="confirmed">
+                    <Check className="size-4" />
+                    {t("owner.confirmed")}
+                  </Status>
+                  {!isCompleted(job) && (
+                    <CancelBooking
+                      name={a.workerName}
+                      onConfirm={() =>
+                        actions.cancelApplication(a.id, { role: "owner", name: t("owner.myFarm") })
+                      }
+                    />
+                  )}
+                </div>
               ) : full ? (
                 <p className="text-sm text-muted-foreground">{t("owner.full")}</p>
               ) : (

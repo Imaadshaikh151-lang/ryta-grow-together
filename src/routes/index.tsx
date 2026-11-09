@@ -1,3 +1,4 @@
+import { ClearSamples } from "@/components/Cleanup";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { Tractor, Users, HardHat, ChevronRight } from "lucide-react";
@@ -72,6 +73,7 @@ function Index() {
       >
         {t("demo.reset")}
       </button>
+      <ClearSamples />
       {resetDone && (
         <p role="status" className="text-center text-sm font-semibold text-primary">
           {t("demo.resetDone")}
